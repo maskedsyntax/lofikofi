@@ -72,9 +72,6 @@ class _AppShellState extends State<AppShell> {
       backgroundColor: t.bg,
       body: Column(
         children: [
-          // Titlebar
-          _Titlebar(theme: t),
-
           // Navigation
           _NavBar(
             theme: t,
@@ -98,39 +95,6 @@ class _AppShellState extends State<AppShell> {
                   TodoPanel(theme: t),
                 ][_tabIndex],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Titlebar extends StatelessWidget {
-  final GruvboxTheme theme;
-
-  const _Titlebar({
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      color: theme.bgAlt,
-      child: Row(
-        children: [
-          // On macOS, traffic lights take up about 70px if we extend content.
-          // For now, we just add the title.
-          const SizedBox(width: 60),
-          Text(
-            'lofikofi',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: theme.textSecondary,
-              letterSpacing: -0.2,
             ),
           ),
         ],
