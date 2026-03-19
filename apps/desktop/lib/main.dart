@@ -73,7 +73,7 @@ class _AppShellState extends State<AppShell> {
       body: Column(
         children: [
           // Titlebar
-          _Titlebar(theme: t, isDark: _isDark, onToggleTheme: _toggleTheme),
+          _Titlebar(theme: t),
 
           // Navigation
           _NavBar(
@@ -81,6 +81,8 @@ class _AppShellState extends State<AppShell> {
             tabs: _tabs,
             activeIndex: _tabIndex,
             onTap: (i) => setState(() => _tabIndex = i),
+            isDark: _isDark,
+            onToggleTheme: _toggleTheme,
           ),
 
           // Content
@@ -106,13 +108,9 @@ class _AppShellState extends State<AppShell> {
 
 class _Titlebar extends StatelessWidget {
   final GruvboxTheme theme;
-  final bool isDark;
-  final VoidCallback onToggleTheme;
 
   const _Titlebar({
     required this.theme,
-    required this.isDark,
-    required this.onToggleTheme,
   });
 
   @override
@@ -135,8 +133,6 @@ class _Titlebar extends StatelessWidget {
               letterSpacing: -0.2,
             ),
           ),
-          const Spacer(),
-          _ThemeToggleButton(theme: theme, isDark: isDark, onTap: onToggleTheme),
         ],
       ),
     );
@@ -200,11 +196,10 @@ class _ThemeToggleButtonState extends State<_ThemeToggleButton> with SingleTicke
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: _hovered ? t.borderHeavy : t.border),
-            color: _hovered ? t.surfaceHover : t.surface,
+            color: _hovered ? t.surfaceHover : Colors.transparent,
           ),
           child: RotationTransition(
             turns: _controller,
@@ -213,8 +208,8 @@ class _ThemeToggleButtonState extends State<_ThemeToggleButton> with SingleTicke
               child: Icon(
                 widget.isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
                 key: ValueKey(widget.isDark),
-                size: 16,
-                color: _hovered ? t.text : t.textSecondary,
+                size: 14,
+                color: _hovered ? t.text : t.textDim,
               ),
             ),
           ),
@@ -229,12 +224,16 @@ class _NavBar extends StatelessWidget {
   final List<String> tabs;
   final int activeIndex;
   final ValueChanged<int> onTap;
+  final bool isDark;
+  final VoidCallback onToggleTheme;
 
   const _NavBar({
     required this.theme,
     required this.tabs,
     required this.activeIndex,
     required this.onTap,
+    required this.isDark,
+    required this.onToggleTheme,
   });
 
   @override
@@ -254,43 +253,60 @@ class _NavBar extends StatelessWidget {
               color: theme.surface,
               border: Border.all(color: theme.border),
             ),
-            child: Stack(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Sliding indicator
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOutCubic,
-                  left: activeIndex * 82.0, // Approximate width of each item
-                  top: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 80,
-                    margin: const EdgeInsets.symmetric(horizontal: 1),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(7),
-                      color: theme.bg,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
+                Stack(
+                  children: [
+                    // Sliding indicator
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      left: activeIndex * 82.0, // Approximate width of each item
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 80,
+                        margin: const EdgeInsets.symmetric(horizontal: 1),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(7),
+                          color: theme.bg,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
                         ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (var i = 0; i < tabs.length; i++)
+                          _SegItem(
+                            label: tabs[i],
+                            isActive: i == activeIndex,
+                            theme: theme,
+                            onTap: () => onTap(i),
+                          ),
                       ],
                     ),
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (var i = 0; i < tabs.length; i++)
-                      _SegItem(
-                        label: tabs[i],
-                        isActive: i == activeIndex,
-                        theme: theme,
-                        onTap: () => onTap(i),
-                      ),
                   ],
                 ),
+                Container(
+                  height: 16,
+                  width: 1,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  color: theme.border,
+                ),
+                _ThemeToggleButton(
+                  theme: theme,
+                  isDark: isDark,
+                  onTap: onToggleTheme,
+                ),
+                const SizedBox(width: 2),
               ],
             ),
           ),
