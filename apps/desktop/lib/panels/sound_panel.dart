@@ -108,8 +108,24 @@ class _LayerRow extends StatefulWidget {
   State<_LayerRow> createState() => _LayerRowState();
 }
 
-class _LayerRowState extends State<_LayerRow> {
+class _LayerRowState extends State<_LayerRow> with SingleTickerProviderStateMixin {
   bool _hovered = false;
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   GruvboxTheme get t => widget.theme;
   AmbientLayer get layer => widget.layer;
@@ -124,11 +140,11 @@ class _LayerRowState extends State<_LayerRow> {
       child: GestureDetector(
         onTap: widget.onToggle,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.only(bottom: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(8),
             color: isActive
                 ? t.accentSoft
                 : (_hovered ? t.surface : Colors.transparent),
@@ -139,28 +155,52 @@ class _LayerRowState extends State<_LayerRow> {
           child: Row(
             children: [
               // Chip indicator
-              Container(
-                width: 18,
-                height: 18,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isActive ? t.accent : t.borderHeavy,
-                    width: 1.5,
-                  ),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isActive ? t.accent : t.textDim,
+              SizedBox(
+                width: 22,
+                height: 22,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (isActive)
+                      AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          return Container(
+                            width: 14 + (8 * _pulseController.value),
+                            height: 14 + (8 * _pulseController.value),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: t.accent.withValues(alpha: 0.2 * (1 - _pulseController.value)),
+                            ),
+                          );
+                        },
+                      ),
+                    Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isActive ? t.accent : t.borderHeavy,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: isActive ? 8 : 6,
+                          height: isActive ? 8 : 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isActive ? t.accent : t.textDim,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: 12),
 
               // Labels
               Expanded(
@@ -171,7 +211,7 @@ class _LayerRowState extends State<_LayerRow> {
                       layer.label,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                         color: isActive ? t.accent : t.text,
                       ),
                     ),
@@ -185,21 +225,25 @@ class _LayerRowState extends State<_LayerRow> {
 
               // Volume slider (only when active)
               if (isActive)
-                SizedBox(
-                  width: 80,
-                  child: SliderTheme(
-                    data: SliderThemeData(
-                      trackHeight: 2,
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-                      activeTrackColor: t.accent,
-                      inactiveTrackColor: t.borderHeavy,
-                      thumbColor: t.accent,
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-                      overlayColor: t.accent.withValues(alpha: 0.1),
-                    ),
-                    child: Slider(
-                      value: layer.volume,
-                      onChanged: widget.onVolumeChanged,
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: 1.0,
+                  child: SizedBox(
+                    width: 80,
+                    child: SliderTheme(
+                      data: SliderThemeData(
+                        trackHeight: 2,
+                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                        activeTrackColor: t.accent,
+                        inactiveTrackColor: t.borderHeavy,
+                        thumbColor: t.accent,
+                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+                        overlayColor: t.accent.withValues(alpha: 0.1),
+                      ),
+                      child: Slider(
+                        value: layer.volume,
+                        onChanged: widget.onVolumeChanged,
+                      ),
                     ),
                   ),
                 ),

@@ -85,14 +85,17 @@ class _AppShellState extends State<AppShell> {
 
           // Content
           Expanded(
-            child: IndexedStack(
-              index: _tabIndex,
-              children: [
-                SoundPanel(theme: t),
-                FocusPanel(theme: t),
-                BoardPanel(theme: t),
-                TodoPanel(theme: t),
-              ],
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: KeyedSubtree(
+                key: ValueKey(_tabIndex),
+                child: [
+                  SoundPanel(theme: t),
+                  FocusPanel(theme: t),
+                  BoardPanel(theme: t),
+                  TodoPanel(theme: t),
+                ][_tabIndex],
+              ),
             ),
           ),
         ],
@@ -120,6 +123,18 @@ class _Titlebar extends StatelessWidget {
       color: theme.bgAlt,
       child: Row(
         children: [
+          // On macOS, traffic lights take up about 70px if we extend content.
+          // For now, we just add the title.
+          const SizedBox(width: 60),
+          Text(
+            'lofikofi',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: theme.textSecondary,
+              letterSpacing: -0.2,
+            ),
+          ),
           const Spacer(),
           _ThemeToggleButton(theme: theme, isDark: isDark, onTap: onToggleTheme),
         ],
@@ -143,8 +158,37 @@ class _ThemeToggleButton extends StatefulWidget {
   State<_ThemeToggleButton> createState() => _ThemeToggleButtonState();
 }
 
-class _ThemeToggleButtonState extends State<_ThemeToggleButton> {
+class _ThemeToggleButtonState extends State<_ThemeToggleButton> with SingleTickerProviderStateMixin {
   bool _hovered = false;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    if (widget.isDark) _controller.value = 0.5;
+  }
+
+  @override
+  void didUpdateWidget(_ThemeToggleButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isDark != oldWidget.isDark) {
+      if (widget.isDark) {
+        _controller.animateTo(0.5, curve: Curves.easeInOutBack);
+      } else {
+        _controller.animateTo(0.0, curve: Curves.easeInOutBack);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,31 +199,24 @@ class _ThemeToggleButtonState extends State<_ThemeToggleButton> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
+            shape: BoxShape.circle,
             border: Border.all(color: _hovered ? t.borderHeavy : t.border),
             color: _hovered ? t.surfaceHover : t.surface,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
+          child: RotationTransition(
+            turns: _controller,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
                 widget.isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
-                size: 14,
+                key: ValueKey(widget.isDark),
+                size: 16,
                 color: _hovered ? t.text : t.textSecondary,
               ),
-              const SizedBox(width: 6),
-              Text(
-                widget.isDark ? 'Light' : 'Dark',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: _hovered ? t.text : t.textSecondary,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -213,22 +250,47 @@ class _NavBar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
               color: theme.surface,
               border: Border.all(color: theme.border),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Stack(
               children: [
-                for (var i = 0; i < tabs.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 2),
-                  _SegItem(
-                    label: tabs[i],
-                    isActive: i == activeIndex,
-                    theme: theme,
-                    onTap: () => onTap(i),
+                // Sliding indicator
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOutCubic,
+                  left: activeIndex * 82.0, // Approximate width of each item
+                  top: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 80,
+                    margin: const EdgeInsets.symmetric(horizontal: 1),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(7),
+                      color: theme.bg,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < tabs.length; i++)
+                      _SegItem(
+                        label: tabs[i],
+                        isActive: i == activeIndex,
+                        theme: theme,
+                        onTap: () => onTap(i),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -266,25 +328,24 @@ class _SegItemState extends State<_SegItem> {
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            color: widget.isActive ? t.bg : Colors.transparent,
-            boxShadow: widget.isActive
-                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 2, offset: const Offset(0, 1))]
-                : null,
+        child: Container(
+          width: 80, // Fixed width for easier sliding indicator math
+          height: 30,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: Colors.transparent,
           ),
-          child: Text(
-            widget.label,
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
             style: TextStyle(
               fontSize: 12,
               fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.w500,
+              fontFamily: 'SF Pro Text',
               color: widget.isActive
                   ? t.text
                   : (_hovered ? t.textSecondary : t.textDim),
             ),
+            child: Text(widget.label),
           ),
         ),
       ),
