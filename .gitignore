@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pub-cache/
+.pub/
+.dart_tool/
+
+# Build outputs
+dist/
+build/
+coverage/
+*.tgz
+
+# Flutter
+.flutter-plugins-dependencies
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files
+bun.lock
+package-lock.json
+
+# Misc
+.cache/
+.parcel-cache
+*.tsbuildinfo
+.svelte-kit/

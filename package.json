@@ -1,0 +1,17 @@
+{
+  "name": "lofikofi-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Lofikofi: a desktop-first, ambient coworking environment.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:desktop": "cd apps/desktop && flutter run -d macos",
+    "build:desktop": "cd apps/desktop && flutter build macos"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
