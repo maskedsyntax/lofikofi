@@ -250,7 +250,7 @@
 
         <ul class="hero-pills" aria-label="Product highlights">
           <li><WifiOff {...iconProps} size={15} /> Offline-ready</li>
-          <li><LayoutGrid {...iconProps} size={15} /> Modular layout</li>
+          <li><Sparkles {...iconProps} size={15} /> Animated UI</li>
           <li><AudioLines {...iconProps} size={15} /> Layered audio</li>
         </ul>
 
@@ -269,6 +269,17 @@
 
       <div class="hero-visual" in:fly={{ x: 24, duration: 450, delay: 120 }}>
         <div class="hero-card">
+          <div class="hero-card-nav-mock">
+            <div class="mock-tabs">
+              <span class="active">Ambient</span>
+              <span>Focus</span>
+              <span>Boards</span>
+            </div>
+            <div class="mock-nav-spacer"></div>
+            <div class="mock-theme-toggle">
+              <Moon size={10} />
+            </div>
+          </div>
           <div class="hero-card-top">
             <div class="live-pill">
               <span class="live-dot" aria-hidden="true"></span>
@@ -285,7 +296,6 @@
           <div class="chips">
             <span><Timer {...iconProps} size={14} /> Focus timer</span>
             <span><AudioLines {...iconProps} size={14} /> Ambient mixer</span>
-            <span><KanbanSquare {...iconProps} size={14} /> Daily board</span>
           </div>
         </div>
         <div class="hero-side-card">
