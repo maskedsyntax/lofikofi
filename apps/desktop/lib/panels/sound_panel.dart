@@ -27,66 +27,212 @@ class _SoundPanelState extends State<SoundPanel> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Row(
-            children: [
-              Text(
-                'Ambient mixer',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.1,
-                  color: t.text,
+          // Left side: Mixer List
+          Expanded(
+            flex: 6,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Text(
+                      'Ambient mixer',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.1,
+                        color: t.text,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (activeCount > 0)
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: t.accentBright,
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              if (activeCount > 0)
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: t.accentBright,
+                const SizedBox(height: 3),
+                Text(
+                  activeCount > 0
+                      ? '$activeCount layer${activeCount == 1 ? '' : 's'} playing'
+                      : 'All layers muted',
+                  style: TextStyle(fontSize: 11, color: t.textDim),
+                ),
+                const SizedBox(height: 10),
+
+                // Layers
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _mixer.layers.length,
+                    padding: EdgeInsets.zero,
+                    itemBuilder: (context, index) {
+                      final layer = _mixer.layers[index];
+                      return _LayerRow(
+                        layer: layer,
+                        theme: t,
+                        onToggle: () async {
+                          await layer.toggle();
+                          setState(() {});
+                        },
+                        onVolumeChanged: (v) async {
+                          await layer.setVol(v);
+                          setState(() {});
+                        },
+                      );
+                    },
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 3),
-          Text(
-            activeCount > 0
-                ? '$activeCount layer${activeCount == 1 ? '' : 's'} playing'
-                : 'All layers muted',
-            style: TextStyle(fontSize: 11, color: t.textDim),
-          ),
-          const SizedBox(height: 10),
 
-          // Layers
+          // Right side: Visualizer and Dynamic Icon
           Expanded(
-            child: ListView.builder(
-              itemCount: _mixer.layers.length,
-              padding: EdgeInsets.zero,
-              itemBuilder: (context, index) {
-                final layer = _mixer.layers[index];
-                return _LayerRow(
-                  layer: layer,
-                  theme: t,
-                  onToggle: () async {
-                    await layer.toggle();
-                    setState(() {});
-                  },
-                  onVolumeChanged: (v) async {
-                    await layer.setVol(v);
-                    setState(() {});
-                  },
-                );
-              },
+            flex: 4,
+            child: _VisualizerArea(
+              theme: t,
+              mixer: _mixer,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _VisualizerArea extends StatelessWidget {
+  final GruvboxTheme theme;
+  final AmbientMixer mixer;
+
+  const _VisualizerArea({
+    required this.theme,
+    required this.mixer,
+  });
+
+  IconData _getIcon() {
+    final active = mixer.layers.where((l) => l.active).toList();
+    if (active.isEmpty) return Icons.multitrack_audio_outlined;
+    if (active.length > 1) return Icons.auto_awesome_outlined;
+
+    final id = active.first.id;
+    if (id.contains('rain')) return Icons.umbrella_outlined;
+    if (id.contains('forest')) return Icons.forest_outlined;
+    if (id.contains('stream')) return Icons.water_outlined;
+    if (id.contains('wind')) return Icons.air_outlined;
+    if (id.contains('thunder')) return Icons.thunderstorm_outlined;
+    if (id.contains('cafe')) return Icons.coffee_outlined;
+    if (id.contains('city')) return Icons.location_city_outlined;
+    if (id.contains('keyboard')) return Icons.keyboard_outlined;
+    if (id.contains('train')) return Icons.train_outlined;
+    if (id.contains('fire')) return Icons.local_fire_department_outlined;
+    if (id.contains('cricket')) return Icons.nights_stay_outlined;
+    if (id.contains('chime')) return Icons.music_note_outlined;
+
+    return Icons.waves_outlined;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = mixer.activeCount > 0;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isActive ? theme.accentSoft : theme.surface,
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Icon(
+              _getIcon(),
+              key: ValueKey(_getIcon()),
+              size: 48,
+              color: isActive ? theme.accent : theme.textDim,
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+        _SoundVisualizer(
+          theme: theme,
+          isActive: isActive,
+        ),
+      ],
+    );
+  }
+}
+
+class _SoundVisualizer extends StatefulWidget {
+  final GruvboxTheme theme;
+  final bool isActive;
+
+  const _SoundVisualizer({
+    required this.theme,
+    required this.isActive,
+  });
+
+  @override
+  State<_SoundVisualizer> createState() => _SoundVisualizerState();
+}
+
+class _SoundVisualizerState extends State<_SoundVisualizer> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  final List<double> _heights = List.generate(12, (_) => 0.2);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(12, (index) {
+            // Pseudo-random animation based on index and controller
+            final wave = (1.0 + (index % 3) * 0.2) * _controller.value;
+            final baseHeight = widget.isActive ? 4.0 : 2.0;
+            final maxHeight = widget.isActive ? 24.0 : 2.0;
+            final h = baseHeight + (maxHeight - baseHeight) * (0.2 + 0.8 * (index % 4 == 0 ? wave : (1.0 - wave)).abs());
+
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 100),
+              width: 3,
+              height: h,
+              margin: const EdgeInsets.symmetric(horizontal: 1.5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(99),
+                color: widget.isActive ? widget.theme.accent : widget.theme.borderHeavy,
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
