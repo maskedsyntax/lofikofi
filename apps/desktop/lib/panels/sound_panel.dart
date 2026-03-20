@@ -121,18 +121,18 @@ class _VisualizerArea extends StatelessWidget {
   IconData _getIcon() {
     final active = mixer.layers.where((l) => l.active).toList();
     if (active.isEmpty) return Icons.multitrack_audio_outlined;
-    if (active.length > 1) return Icons.auto_awesome_outlined;
+    if (active.length > 1) return Icons.blur_on_outlined; // Better icon for mixed sounds
 
     final id = active.first.id;
+    if (id == 'train') return Icons.directions_railway_outlined;
     if (id.contains('rain')) return Icons.umbrella_outlined;
-    if (id.contains('forest')) return Icons.forest_outlined;
-    if (id.contains('stream')) return Icons.water_outlined;
-    if (id.contains('wind')) return Icons.air_outlined;
-    if (id.contains('thunder')) return Icons.thunderstorm_outlined;
-    if (id.contains('cafe')) return Icons.coffee_outlined;
-    if (id.contains('city')) return Icons.location_city_outlined;
-    if (id.contains('keyboard')) return Icons.keyboard_outlined;
-    if (id.contains('train')) return Icons.directions_railway_outlined;
+    if (id == 'forest') return Icons.forest_outlined;
+    if (id == 'stream') return Icons.water_outlined;
+    if (id == 'wind') return Icons.air_outlined;
+    if (id == 'thunder') return Icons.thunderstorm_outlined;
+    if (id == 'cafe') return Icons.coffee_outlined;
+    if (id == 'city') return Icons.location_city_outlined;
+    if (id == 'keyboard') return Icons.keyboard_outlined;
     if (id.contains('fire')) return Icons.local_fire_department_outlined;
     if (id.contains('cricket')) return Icons.nights_stay_outlined;
     if (id.contains('chime')) return Icons.music_note_outlined;
