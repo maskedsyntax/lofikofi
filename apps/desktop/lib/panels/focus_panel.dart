@@ -95,10 +95,11 @@ class _FocusPanelState extends State<FocusPanel> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Pill label
             Container(
@@ -137,7 +138,7 @@ class _FocusPanelState extends State<FocusPanel> {
 
             // Timer face
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
+              padding: const EdgeInsets.symmetric(vertical: 30),
               child: Column(
                 children: [
                   Text(
@@ -190,7 +191,7 @@ class _FocusPanelState extends State<FocusPanel> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
             Text(
               'Space to start / pause, R to reset (coming soon).',
