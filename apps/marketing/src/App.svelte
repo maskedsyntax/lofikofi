@@ -269,14 +269,13 @@
         </p>
         <h1>A quieter place to start work - and stay in flow.</h1>
         <p class="lead">
-          Lofikofi is a distraction-free workspace you open before you start working. Blend ambient soundscapes,
-          start a focused timer, and keep organization light - so the rest of the world gets quieter.
+          Lofikofi is a distraction-free workspace you open before work. Blend ambient soundscapes, start a focused
+          timer, and keep organization light.
         </p>
 
         <ul class="hero-pills" aria-label="Product highlights">
           <li><WifiOff {...iconProps} size={15} /> Offline-ready</li>
           <li><LayoutGrid {...iconProps} size={15} /> Rearrangeable panels</li>
-          <li><AudioLines {...iconProps} size={15} /> Layered sound scenes</li>
         </ul>
 
         <div class="hero-cta">
@@ -348,15 +347,6 @@
           <p class="section-lead section-lead--right section-lead--preview">
             A quick, distraction-free preview of the main surfaces: ambient, focus, boards, and micro-todos.
           </p>
-        </div>
-        <div class="preview-badge">
-          <div class="preview-badge-icon">
-            <Timer {...iconProps} size={20} />
-          </div>
-          <div>
-            <strong class="preview-badge-title">Built for calm</strong>
-            <p class="preview-badge-body">Modern glass-like UI and Gruvbox-inspired colors.</p>
-          </div>
         </div>
       </div>
 
