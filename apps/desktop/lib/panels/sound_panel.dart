@@ -132,7 +132,7 @@ class _VisualizerArea extends StatelessWidget {
     if (id.contains('cafe')) return Icons.coffee_outlined;
     if (id.contains('city')) return Icons.location_city_outlined;
     if (id.contains('keyboard')) return Icons.keyboard_outlined;
-    if (id.contains('train')) return Icons.train_outlined;
+    if (id.contains('train')) return Icons.directions_railway_outlined;
     if (id.contains('fire')) return Icons.local_fire_department_outlined;
     if (id.contains('cricket')) return Icons.nights_stay_outlined;
     if (id.contains('chime')) return Icons.music_note_outlined;
