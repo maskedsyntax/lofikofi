@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, afterUpdate } from "svelte";
   import { fade, fly } from "svelte/transition";
   import Activity from "@lucide/svelte/icons/activity";
   import Apple from "@lucide/svelte/icons/apple";
@@ -32,10 +32,29 @@
   const iconProps = { size: 20, strokeWidth: 1.65, "aria-hidden": true as const };
 
   let theme: Theme = "light";
+  let activePreview = 0;
 
-  function setPreview(index: number) {
-    activePreview = index;
+  function syncPreview() {
+    document.querySelectorAll<HTMLElement>("[data-panel-idx]").forEach((el) => {
+      el.style.display = Number(el.dataset.panelIdx) === activePreview ? "" : "none";
+    });
+    document.querySelectorAll<HTMLElement>("[data-tab-idx]").forEach((el) => {
+      el.classList.toggle("preview-tab--active", Number(el.dataset.tabIdx) === activePreview);
+    });
+    const tab = previewTabs[activePreview];
+    const labelEl = document.getElementById("preview-label");
+    const captionEl = document.getElementById("preview-caption");
+    if (labelEl) labelEl.textContent = tab.label;
+    if (captionEl) captionEl.textContent = tab.caption;
   }
+
+  function selectTab(index: number) {
+    activePreview = index;
+    syncPreview();
+  }
+
+  afterUpdate(syncPreview);
+  onMount(syncPreview);
 
   const featureCards = [
     {
@@ -125,8 +144,6 @@
       caption: "Micro-todos with a daily reset to keep things fresh."
     }
   ] as const;
-
-  let activePreview = 0;
 
   const downloads = [
     {
@@ -297,29 +314,10 @@
       <div class="preview-card">
         <div class="preview-tabs" role="tablist" aria-label="App preview tabs">
             <div class="preview-tabs-track">
-              <span
-                class="preview-tab-indicator"
-                style={`transform: translateX(${activePreview * 80}px);`}
-                aria-hidden="true"
-              ></span>
-              {#each previewTabs as t, idx}
-                <input
-                  class="preview-tab-input"
-                  type="radio"
-                  id={`preview-tab-${idx}`}
-                  name="preview-tab-group"
-                  checked={idx === activePreview}
-                  on:change={() => setPreview(idx)}
-                  aria-hidden="true"
-                />
-                <label
-                  class="preview-tab"
-                  class:preview-tab--active={idx === activePreview}
-                  for={`preview-tab-${idx}`}
-                >
-                  {t.label}
-                </label>
-              {/each}
+              <button type="button" class="preview-tab preview-tab--active" data-tab-idx="0" on:click={() => selectTab(0)}>Ambient</button>
+              <button type="button" class="preview-tab" data-tab-idx="1" on:click={() => selectTab(1)}>Focus</button>
+              <button type="button" class="preview-tab" data-tab-idx="2" on:click={() => selectTab(2)}>Boards</button>
+              <button type="button" class="preview-tab" data-tab-idx="3" on:click={() => selectTab(3)}>To-dos</button>
               <span class="preview-tabs-divider" aria-hidden="true"></span>
               <button type="button" class="preview-settings" aria-label="Toggle theme" on:click={toggleTheme}>
                 {#if theme === "light"}
@@ -334,110 +332,108 @@
           <div class="mock-app-media" aria-label="Mock app UI preview">
             <div class="mock-app">
               <div class="mock-app-body">
-                {#if activePreview === 0}
-                  <div class="mock-ambient">
-                    <div class="mock-ambient-left">
-                      <div class="mock-section-title">
-                        Ambient mixer <span class="mock-live-dot" aria-hidden="true"></span>
-                      </div>
-                      <div class="mock-section-subtitle">1 layer playing</div>
+                <div class="mock-ambient" data-panel-idx="0">
+                  <div class="mock-ambient-left">
+                    <div class="mock-section-title">
+                      Ambient mixer <span class="mock-live-dot" aria-hidden="true"></span>
+                    </div>
+                    <div class="mock-section-subtitle">1 layer playing</div>
 
-                      <div class="mock-sound-list" role="list" aria-label="Sound layers">
-                        <div class="mock-sound-row" role="listitem">
-                          <span class="mock-radio" aria-hidden="true"></span>
-                          <div>
-                            <div class="mock-sound-name">Rain</div>
-                            <div class="mock-sound-sub">Steady rainfall</div>
-                          </div>
-                        </div>
-                        <div class="mock-sound-row" role="listitem">
-                          <span class="mock-radio mock-radio--muted" aria-hidden="true"></span>
-                          <div>
-                            <div class="mock-sound-name">Calm rain</div>
-                            <div class="mock-sound-sub">Gentle drizzle</div>
-                          </div>
-                        </div>
-                        <div class="mock-sound-row" role="listitem">
-                          <span class="mock-radio mock-radio--muted" aria-hidden="true"></span>
-                          <div>
-                            <div class="mock-sound-name">Rain + birds</div>
-                            <div class="mock-sound-sub">Tropical shower</div>
-                          </div>
+                    <div class="mock-sound-list" role="list" aria-label="Sound layers">
+                      <div class="mock-sound-row" role="listitem">
+                        <span class="mock-radio" aria-hidden="true"></span>
+                        <div>
+                          <div class="mock-sound-name">Rain</div>
+                          <div class="mock-sound-sub">Steady rainfall</div>
                         </div>
                       </div>
-
-                      <div class="mock-slider-card">
-                        <div class="mock-slider-title">
-                          Café <span class="mock-mini-dot" aria-hidden="true"></span>
+                      <div class="mock-sound-row" role="listitem">
+                        <span class="mock-radio mock-radio--muted" aria-hidden="true"></span>
+                        <div>
+                          <div class="mock-sound-name">Calm rain</div>
+                          <div class="mock-sound-sub">Gentle drizzle</div>
                         </div>
-                        <div class="mock-slider-bar" aria-hidden="true">
-                          <div class="mock-slider-track"></div>
-                          <div class="mock-slider-thumb"></div>
+                      </div>
+                      <div class="mock-sound-row" role="listitem">
+                        <span class="mock-radio mock-radio--muted" aria-hidden="true"></span>
+                        <div>
+                          <div class="mock-sound-name">Rain + birds</div>
+                          <div class="mock-sound-sub">Tropical shower</div>
                         </div>
                       </div>
                     </div>
 
-                    <div class="mock-ambient-right" aria-hidden="true">
-                      <div class="mock-mic-circle">
-                        <div class="mock-mic-shape"></div>
+                    <div class="mock-slider-card">
+                      <div class="mock-slider-title">
+                        Café <span class="mock-mini-dot" aria-hidden="true"></span>
                       </div>
-                      <div class="mock-wave-bars">
-                        <span></span><span></span><span></span><span></span><span></span>
-                        <span></span><span></span><span></span><span></span><span></span>
-                      </div>
-                    </div>
-                  </div>
-                {:else if activePreview === 1}
-                  <div class="mock-focus">
-                    <div class="mock-focus-mode-pill">
-                      <span class="mock-focus-mode-pill__label">Focus timer</span>
-                      <span class="mock-focus-mode-pill__badge">IDLE</span>
-                    </div>
-                    <div class="mock-focus-timer">25:00</div>
-                    <div class="mock-focus-sub">25 minute focus, 5 minute break.</div>
-                    <div class="mock-focus-buttons">
-                      <button type="button" class="mock-pill-btn mock-pill-btn--active">Pomodoro</button>
-                      <button type="button" class="mock-pill-btn">Deep work</button>
-                    </div>
-                    <div class="mock-focus-actions">
-                      <button type="button" class="mock-action-btn mock-action-btn--primary">Start</button>
-                      <button type="button" class="mock-action-btn">Reset</button>
-                    </div>
-                    <div class="mock-focus-hint">Space to start / pause, R to reset.</div>
-                  </div>
-                {:else if activePreview === 2}
-                  <div class="mock-boards">
-                    <div class="mock-board-desc">
-                      Workspace board <span class="mock-board-desc-icon" aria-hidden="true"></span>
-                      <div class="mock-board-sub">Drag-free kanban. Move cards with arrows.</div>
-                    </div>
-                    <div class="mock-board-columns" aria-hidden="true">
-                      <div class="mock-board-col">
-                        <div class="mock-board-col-title">TODAY</div>
-                        <div class="mock-board-add">Add card...</div>
-                      </div>
-                      <div class="mock-board-col">
-                        <div class="mock-board-col-title">THIS WEEK</div>
-                        <div class="mock-board-add">Add card...</div>
-                      </div>
-                      <div class="mock-board-col">
-                        <div class="mock-board-col-title">LATER</div>
-                        <div class="mock-board-add">Add card...</div>
+                      <div class="mock-slider-bar" aria-hidden="true">
+                        <div class="mock-slider-track"></div>
+                        <div class="mock-slider-thumb"></div>
                       </div>
                     </div>
                   </div>
-                {:else}
-                  <div class="mock-todos">
-                    <div class="mock-todos-tag">Micro-todos</div>
-                    <div class="mock-todos-sub">Daily tasks. Resets each morning.</div>
-                    <div class="mock-todos-input-row">
-                      <div class="mock-todos-input" aria-hidden="true">Add a task...</div>
-                      <button type="button" class="mock-todos-add-btn">Add</button>
+
+                  <div class="mock-ambient-right" aria-hidden="true">
+                    <div class="mock-mic-circle">
+                      <div class="mock-mic-shape"></div>
                     </div>
-                    <div class="mock-todos-empty">No tasks yet. Add one above.</div>
-                    <div class="mock-todos-bottom">0 open</div>
+                    <div class="mock-wave-bars">
+                      <span></span><span></span><span></span><span></span><span></span>
+                      <span></span><span></span><span></span><span></span><span></span>
+                    </div>
                   </div>
-                {/if}
+                </div>
+
+                <div class="mock-focus" data-panel-idx="1" style="display:none">
+                  <div class="mock-focus-mode-pill">
+                    <span class="mock-focus-mode-pill__label">Focus timer</span>
+                    <span class="mock-focus-mode-pill__badge">IDLE</span>
+                  </div>
+                  <div class="mock-focus-timer">25:00</div>
+                  <div class="mock-focus-sub">25 minute focus, 5 minute break.</div>
+                  <div class="mock-focus-buttons">
+                    <button type="button" class="mock-pill-btn mock-pill-btn--active">Pomodoro</button>
+                    <button type="button" class="mock-pill-btn">Deep work</button>
+                  </div>
+                  <div class="mock-focus-actions">
+                    <button type="button" class="mock-action-btn mock-action-btn--primary">Start</button>
+                    <button type="button" class="mock-action-btn">Reset</button>
+                  </div>
+                  <div class="mock-focus-hint">Space to start / pause, R to reset.</div>
+                </div>
+
+                <div class="mock-boards" data-panel-idx="2" style="display:none">
+                  <div class="mock-board-desc">
+                    Workspace board <span class="mock-board-desc-icon" aria-hidden="true"></span>
+                    <div class="mock-board-sub">Drag-free kanban. Move cards with arrows.</div>
+                  </div>
+                  <div class="mock-board-columns" aria-hidden="true">
+                    <div class="mock-board-col">
+                      <div class="mock-board-col-title">TODAY</div>
+                      <div class="mock-board-add">Add card...</div>
+                    </div>
+                    <div class="mock-board-col">
+                      <div class="mock-board-col-title">THIS WEEK</div>
+                      <div class="mock-board-add">Add card...</div>
+                    </div>
+                    <div class="mock-board-col">
+                      <div class="mock-board-col-title">LATER</div>
+                      <div class="mock-board-add">Add card...</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mock-todos" data-panel-idx="3" style="display:none">
+                  <div class="mock-todos-tag">Micro-todos</div>
+                  <div class="mock-todos-sub">Daily tasks. Resets each morning.</div>
+                  <div class="mock-todos-input-row">
+                    <div class="mock-todos-input" aria-hidden="true">Add a task...</div>
+                    <button type="button" class="mock-todos-add-btn">Add</button>
+                  </div>
+                  <div class="mock-todos-empty">No tasks yet. Add one above.</div>
+                  <div class="mock-todos-bottom">0 open</div>
+                </div>
               </div>
             </div>
           </div>
@@ -445,9 +441,9 @@
         <div class="preview-caption">
           <div class="preview-caption-left">
             <span class="preview-caption-dot" aria-hidden="true"></span>
-            <strong>{previewTabs[activePreview].label}</strong>
+            <strong id="preview-label">Ambient</strong>
           </div>
-          <span class="preview-caption-text">{previewTabs[activePreview].caption}</span>
+          <span class="preview-caption-text" id="preview-caption">Blend layered soundscapes until it feels right.</span>
             <span class="preview-caption-hint">Interactive mock</span>
         </div>
       </div>
