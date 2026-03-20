@@ -902,7 +902,7 @@ a {
   grid-area: brand;
   display: flex;
   gap: 0.85rem;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .footer-brand-mark {
