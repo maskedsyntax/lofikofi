@@ -9,13 +9,13 @@
   import CloudRain from "@lucide/svelte/icons/cloud-rain";
   import Download from "@lucide/svelte/icons/download";
   import Feather from "@lucide/svelte/icons/feather";
+  import Github from "@lucide/svelte/icons/github";
   import HardDrive from "@lucide/svelte/icons/hard-drive";
   import Headphones from "@lucide/svelte/icons/headphones";
   import Heart from "@lucide/svelte/icons/heart";
   import KanbanSquare from "@lucide/svelte/icons/kanban-square";
   import LayoutGrid from "@lucide/svelte/icons/layout-grid";
   import ListOrdered from "@lucide/svelte/icons/list-ordered";
-  import Menu from "@lucide/svelte/icons/menu";
   import Monitor from "@lucide/svelte/icons/monitor";
   import Moon from "@lucide/svelte/icons/moon";
   import Repeat2 from "@lucide/svelte/icons/repeat-2";
@@ -25,7 +25,6 @@
   import Terminal from "@lucide/svelte/icons/terminal";
   import Timer from "@lucide/svelte/icons/timer";
   import WifiOff from "@lucide/svelte/icons/wifi-off";
-  import X from "@lucide/svelte/icons/x";
 
   type Theme = "light" | "dark";
   const STORAGE_KEY = "lofikofi:marketing-theme";
@@ -33,13 +32,6 @@
   const iconProps = { size: 20, strokeWidth: 1.65, "aria-hidden": true as const };
 
   let theme: Theme = "light";
-  let mobileMenuOpen = false;
-
-  const links = [
-    { label: "Features", href: "#features", Icon: LayoutGrid },
-    { label: "How it works", href: "#workflow", Icon: ListOrdered },
-    { label: "Download", href: "#download", Icon: Download }
-  ];
 
   const featureCards = [
     {
@@ -168,10 +160,6 @@
     applyTheme(theme === "light" ? "dark" : "light");
   }
 
-  function closeMobileMenu() {
-    mobileMenuOpen = false;
-  }
-
   onMount(() => {
     let initial: Theme = "light";
     try {
@@ -200,16 +188,6 @@
       <span class="brand-text">lofikofi</span>
     </a>
 
-    <nav class="desktop-nav" aria-label="Primary">
-      {#each links as link}
-        {@const NavIcon = link.Icon}
-        <a class="nav-link" href={link.href}>
-          <NavIcon {...iconProps} size={17} class="nav-link-icon" />
-          {link.label}
-        </a>
-      {/each}
-    </nav>
-
     <div class="header-actions">
       <button
         class="theme-toggle"
@@ -222,43 +200,13 @@
         {:else}
           <Sun {...iconProps} size={18} />
         {/if}
-        <span class="theme-toggle-label">{theme === "light" ? "Dark" : "Light"}</span>
       </button>
-      <a class="btn btn-primary" href="#download">
+      <a class="btn btn-primary btn-header-cta" href="#download">
         <Download {...iconProps} size={18} />
         Get app
       </a>
-      <button
-        class="mobile-menu"
-        type="button"
-        on:click={() => (mobileMenuOpen = !mobileMenuOpen)}
-        aria-expanded={mobileMenuOpen}
-        aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-      >
-        {#if mobileMenuOpen}
-          <X {...iconProps} size={20} />
-        {:else}
-          <Menu {...iconProps} size={20} />
-        {/if}
-      </button>
     </div>
   </header>
-
-  {#if mobileMenuOpen}
-    <div class="mobile-drawer" transition:fade={{ duration: 160 }}>
-      {#each links as link}
-        {@const DrawerIcon = link.Icon}
-        <a class="mobile-drawer-link" href={link.href} on:click={closeMobileMenu}>
-          <DrawerIcon {...iconProps} size={18} />
-          {link.label}
-        </a>
-      {/each}
-      <a class="mobile-drawer-link mobile-drawer-cta" href="#download" on:click={closeMobileMenu}>
-        <Download {...iconProps} size={18} />
-        Download
-      </a>
-    </div>
-  {/if}
 
   <main id="top">
     <section class="hero">
@@ -311,14 +259,6 @@
             <span><AudioLines {...iconProps} size={14} /> Ambient mixer</span>
             <span><KanbanSquare {...iconProps} size={14} /> Daily board</span>
           </div>
-        </div>
-        <div class="hero-side-card">
-          <p class="side-title">This week</p>
-          <p class="side-stat">12 <span>sessions</span></p>
-          <p class="side-hint">
-            <Repeat2 {...iconProps} size={14} class="inline-icon" />
-            Small sessions add up - focus becomes familiar.
-          </p>
         </div>
       </div>
     </section>
@@ -537,26 +477,19 @@
     </section>
 
     <section id="workflow" class="workflow">
-      <div class="section-head section-head--split">
-        <div>
-          <p class="eyebrow">
-            <ListOrdered {...iconProps} size={14} class="eyebrow-icon" />
-            How it works
-          </p>
-          <h2>Sit down. Start a scene. Begin your focus session.</h2>
-        </div>
-        <p class="section-lead section-lead--right">
-          Three calm steps you repeat until focus feels automatic.
+      <div class="section-head">
+        <p class="eyebrow">
+          <ListOrdered {...iconProps} size={14} class="eyebrow-icon" />
+          How it works
         </p>
+        <h2>Sit down. Start a scene. Begin your focus session.</h2>
+        <p class="section-lead">Three calm steps you repeat until focus feels automatic.</p>
       </div>
 
       <div class="steps">
-        {#each steps as step, i}
+        {#each steps as step}
           {@const StepIcon = step.Icon}
           <article class="step">
-            {#if i < steps.length - 1}
-              <div class="step-connector" aria-hidden="true"></div>
-            {/if}
             <div class="step-icon-row">
               <span class="step-badge">{step.n}</span>
               <div class="step-icon-wrap">
@@ -612,17 +545,19 @@
       </span>
       <div>
         <strong>lofikofi</strong>
-        <p>A calmer desktop workspace - not another task manager.</p>
+        <p>A calm desktop workspace for focus, atmosphere, and steady sessions.</p>
       </div>
     </div>
-    <nav class="footer-nav" aria-label="Footer">
-      <a href="#features">Features</a>
-      <a href="#workflow">Workflow</a>
-      <a href="#download">Download</a>
-    </nav>
+    <div class="footer-cta">
+      <p class="footer-cta-title">Want to help shape Lofikofi?</p>
+      <a class="btn btn-primary btn-header-cta" href="https://github.com/maskedsyntax/lofikofi" target="_blank" rel="noreferrer">
+        <Github {...iconProps} size={17} />
+        Contribute on GitHub
+      </a>
+    </div>
     <p class="footer-meta">
       <Heart {...iconProps} size={14} class="footer-heart" />
-      Built for focus · Gruvbox-inspired
+      Built for focus
     </p>
   </footer>
 </div>
