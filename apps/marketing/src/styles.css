@@ -247,6 +247,22 @@ a {
   background: var(--surface);
 }
 
+.icon-for-light,
+.icon-for-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-for-dark { display: none; }
+[data-theme="dark"] .icon-for-light { display: none; }
+[data-theme="dark"] .icon-for-dark { display: inline-flex; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .icon-for-light { display: none; }
+  :root:not([data-theme="light"]) .icon-for-dark { display: inline-flex; }
+}
+
 .btn-header-cta {
   border-radius: 11px;
   padding: 0.56rem 0.96rem;

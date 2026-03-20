@@ -178,7 +178,9 @@
   }
 
   function toggleTheme() {
-    applyTheme(theme === "light" ? "dark" : "light");
+    const current = document.documentElement.dataset.theme
+      || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    applyTheme(current === "dark" ? "light" : "dark");
   }
 
   onMount(() => {
@@ -214,13 +216,10 @@
         class="theme-toggle"
         type="button"
         on:click={toggleTheme}
-        aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+        aria-label="Toggle theme"
       >
-        {#if theme === "light"}
-          <Moon {...iconProps} size={18} />
-        {:else}
-          <Sun {...iconProps} size={18} />
-        {/if}
+        <span class="icon-for-light"><Moon {...iconProps} size={18} /></span>
+        <span class="icon-for-dark"><Sun {...iconProps} size={18} /></span>
       </button>
       <a class="btn btn-primary btn-header-cta" href="#download">
         <Download {...iconProps} size={18} />
@@ -320,11 +319,8 @@
               <button type="button" class="preview-tab" data-tab-idx="3" on:click={() => selectTab(3)}>To-dos</button>
               <span class="preview-tabs-divider" aria-hidden="true"></span>
               <button type="button" class="preview-settings" aria-label="Toggle theme" on:click={toggleTheme}>
-                {#if theme === "light"}
-                  <Moon {...iconProps} size={14} />
-                {:else}
-                  <Sun {...iconProps} size={14} />
-                {/if}
+                <span class="icon-for-light"><Moon {...iconProps} size={14} /></span>
+                <span class="icon-for-dark"><Sun {...iconProps} size={14} /></span>
               </button>
             </div>
         </div>
