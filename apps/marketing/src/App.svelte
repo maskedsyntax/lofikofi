@@ -352,19 +352,33 @@
 
       <div class="preview-card">
         <div class="preview-tabs" role="tablist" aria-label="App preview tabs">
-          {#each previewTabs as t, idx}
-            <button
-              type="button"
-              class="preview-tab"
-              class:preview-tab--active={idx === activePreview}
-              on:click={() => (activePreview = idx)}
-              role="tab"
-              aria-selected={idx === activePreview}
-            >
-              <t.Icon {...iconProps} size={18} />
-              {t.label}
-            </button>
-          {/each}
+            <div class="preview-tabs-track">
+              <span
+                class="preview-tab-indicator"
+                style={`transform: translateX(${activePreview * 82}px);`}
+                aria-hidden="true"
+              ></span>
+              {#each previewTabs as t, idx}
+                <button
+                  type="button"
+                  class="preview-tab"
+                  class:preview-tab--active={idx === activePreview}
+                  on:click={() => (activePreview = idx)}
+                  role="tab"
+                  aria-selected={idx === activePreview}
+                >
+                  {t.label}
+                </button>
+              {/each}
+              <span class="preview-tabs-divider" aria-hidden="true"></span>
+              <button type="button" class="preview-settings" aria-label="Toggle theme" on:click={toggleTheme}>
+                {#if theme === "light"}
+                  <Moon {...iconProps} size={14} />
+                {:else}
+                  <Sun {...iconProps} size={14} />
+                {/if}
+              </button>
+            </div>
         </div>
 
           <div class="mock-app-media" aria-label="Mock app UI preview">
