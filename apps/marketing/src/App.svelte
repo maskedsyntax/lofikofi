@@ -33,6 +33,10 @@
 
   let theme: Theme = "light";
 
+  function setPreview(index: number) {
+    activePreview = index;
+  }
+
   const featureCards = [
     {
       title: "Atmospheric Soundscapes",
@@ -295,20 +299,26 @@
             <div class="preview-tabs-track">
               <span
                 class="preview-tab-indicator"
-                style={`transform: translateX(${activePreview * 82}px);`}
+                style={`transform: translateX(${activePreview * 80}px);`}
                 aria-hidden="true"
               ></span>
               {#each previewTabs as t, idx}
-                <button
-                  type="button"
+                <input
+                  class="preview-tab-input"
+                  type="radio"
+                  id={`preview-tab-${idx}`}
+                  name="preview-tab-group"
+                  checked={idx === activePreview}
+                  on:change={() => setPreview(idx)}
+                  aria-hidden="true"
+                />
+                <label
                   class="preview-tab"
                   class:preview-tab--active={idx === activePreview}
-                  on:click={() => (activePreview = idx)}
-                  role="tab"
-                  aria-selected={idx === activePreview}
+                  for={`preview-tab-${idx}`}
                 >
                   {t.label}
-                </button>
+                </label>
               {/each}
               <span class="preview-tabs-divider" aria-hidden="true"></span>
               <button type="button" class="preview-settings" aria-label="Toggle theme" on:click={toggleTheme}>
