@@ -74,39 +74,42 @@
 
 <div class="page">
   <header class="site-header">
-    <div class="header-main">
-      <div class="app-nav-container">
-        <div class="app-nav">
-          <div class="nav-indicator" style="transform: translateX({tabs.findIndex(t => t.label === activePage) * 100}%)"></div>
-          {#each tabs as tab}
-            <button 
-              class="nav-tab" 
-              class:active={activePage === tab.label}
-              on:click={() => activePage = tab.label}
-            >
-              {tab.label}
-            </button>
-          {/each}
-        </div>
-        <div class="nav-divider"></div>
-        <button
-          class="nav-theme-toggle"
-          on:click={toggleTheme}
-          aria-label="Toggle theme"
+    <a class="brand" href="/" on:click|preventDefault={() => activePage = "Ambient"}>
+      <span class="brand-mark">
+        <Sparkles size={22} />
+      </span>
+      <span class="brand-text">lofikofi</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Primary">
+      {#each tabs as tab}
+        <button 
+          class="nav-link" 
+          class:active={activePage === tab.label}
+          on:click={() => activePage = tab.label}
         >
-          {#if theme === "light"}
-            <Moon size={14} />
-          {:else}
-            <Sun size={14} />
-          {/if}
+          {tab.label}
         </button>
-      </div>
-    </div>
+      {/each}
+    </nav>
 
     <div class="header-actions">
+      <button
+        class="theme-toggle"
+        type="button"
+        on:click={toggleTheme}
+        aria-label="Toggle theme"
+      >
+        {#if theme === "light"}
+          <Moon size={18} />
+        {:else}
+          <Sun size={18} />
+        {/if}
+        <span class="theme-toggle-label">{theme === "light" ? "Dark" : "Light"}</span>
+      </button>
       <a class="btn btn-primary" href="#download">
-        <Download size={16} />
-        Download
+        <Download size={18} />
+        Get app
       </a>
     </div>
   </header>
