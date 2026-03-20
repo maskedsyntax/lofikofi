@@ -125,7 +125,9 @@ class _VisualizerArea extends StatelessWidget {
 
     final id = active.first.id;
     if (id == 'train') return Icons.directions_railway_outlined;
-    if (id.contains('rain')) return Icons.umbrella_outlined;
+    if (id == 'rain') return Icons.umbrella_outlined;
+    if (id == 'rain_calm') return Icons.grain_outlined; // Drizzle/fine rain
+    if (id == 'rain_birds') return Icons.nature_people_outlined; // Nature/birds feel
     if (id == 'forest') return Icons.forest_outlined;
     if (id == 'stream') return Icons.water_outlined;
     if (id == 'wind') return Icons.air_outlined;
