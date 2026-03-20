@@ -44,45 +44,45 @@
   const featureCards = [
     {
       title: "Atmospheric Soundscapes",
-      body: "Layer rain, forest, cafe ambience, ocean, and fireplace to create your personal focus environment.",
+      body: "Layer rain, forest, cafe ambience, ocean, and fireplace. Control each layer's volume, then save your favorite blend as a scene.",
       Icon: Headphones,
       accent: "warm"
     },
     {
       title: "Focus System",
-      body: "Switch between Pomodoro and deep work modes with clear, distraction-free session controls.",
+      body: "Run Pomodoro or deep work sessions with minimal, glanceable controls. Stay interruption-free and in rhythm.",
       Icon: Timer,
       accent: "cool"
     },
     {
-      title: "Calm Planning Surface",
-      body: "Organize lightweight boards and daily micro-todos without the weight of complex project software.",
+      title: "Micro To-Dos & Boards",
+      body: "Capture micro-todos and lightweight kanban boards. Keep your thoughts organized without heavy project management.",
       Icon: KanbanSquare,
       accent: "neutral"
     },
     {
-      title: "Offline-First Desktop",
-      body: "Lofikofi runs locally, starts fast, and stays reliable even when your internet does not.",
-      Icon: HardDrive,
+      title: "Layout & Theming",
+      body: "Drag, resize, and toggle modular panels to shape your workspace. Choose light/dark, accent colors, and calm backgrounds.",
+      Icon: Sparkles,
       accent: "muted"
     }
   ] as const;
 
   const metrics = [
     {
-      title: "Offline first",
-      body: "Everything essential works locally on your machine.",
-      Icon: WifiOff
+      title: "Atmosphere first",
+      body: "Sound is the first interface: blend scenes until it feels right for you.",
+      Icon: AudioLines
     },
     {
-      title: "Minimal by design",
-      body: "A focused set of tools with no unnecessary bloat.",
-      Icon: Feather
-    },
-    {
-      title: "Built for consistency",
-      body: "One coherent workspace for repeatable deep work sessions.",
+      title: "Consistency over complexity",
+      body: "A narrow, predictable set of tools - quiet, familiar, and ready for focus.",
       Icon: Repeat2
+    },
+    {
+      title: "Offline first",
+      body: "A local-first app that stays ready even when you're offline.",
+      Icon: WifiOff
     }
   ] as const;
 
@@ -90,22 +90,47 @@
     {
       n: "01",
       title: "Set your atmosphere",
-      body: "Choose a sound scene that matches your current energy and context.",
+      body: "Pick a scene, then blend layers until it matches how you want to feel.",
       Icon: CloudRain
     },
     {
       n: "02",
       title: "Start your focus block",
-      body: "Run a Pomodoro or deep work timer with clear, minimal controls.",
+      body: "Start Pomodoro or deep work. Minimal controls, clear status, zero noise.",
       Icon: Timer
     },
     {
       n: "03",
       title: "Capture only what matters",
-      body: "Use micro-todos and boards to stay organized without context switching.",
+      body: "Add micro-todos or cards, then return to the timer - stay in flow.",
       Icon: ClipboardList
     }
   ] as const;
+
+  const previewTabs = [
+    {
+      label: "Ambient",
+      Icon: Headphones,
+      caption: "Blend layered soundscapes until it feels right."
+    },
+    {
+      label: "Focus",
+      Icon: Timer,
+      caption: "Start Pomodoro or deep work and stay interruption-free."
+    },
+    {
+      label: "Boards",
+      Icon: KanbanSquare,
+      caption: "Lightweight boards for calm organization and quick capture."
+    },
+    {
+      label: "To-dos",
+      Icon: ClipboardList,
+      caption: "Micro-todos with a daily reset to keep things fresh."
+    }
+  ] as const;
+
+  let activePreview = 0;
 
   const downloads = [
     {
@@ -240,18 +265,18 @@
       <div class="hero-copy" in:fly={{ x: -24, duration: 450 }}>
         <p class="eyebrow">
           <Sparkles {...iconProps} size={14} class="eyebrow-icon" />
-          Calm desktop coworking space
+          A calm digital room for focus
         </p>
-        <h1>A quieter place to get meaningful work done.</h1>
+        <h1>A quieter place to start work - and stay in flow.</h1>
         <p class="lead">
-          Lofikofi combines ambient sound, focused timing, and lightweight planning into one immersive workspace
-          designed for deep concentration.
+          Lofikofi is a distraction-free workspace you open before you start working. Blend ambient soundscapes,
+          start a focused timer, and keep organization light - so the rest of the world gets quieter.
         </p>
 
         <ul class="hero-pills" aria-label="Product highlights">
           <li><WifiOff {...iconProps} size={15} /> Offline-ready</li>
-          <li><LayoutGrid {...iconProps} size={15} /> Modular layout</li>
-          <li><AudioLines {...iconProps} size={15} /> Layered audio</li>
+          <li><LayoutGrid {...iconProps} size={15} /> Rearrangeable panels</li>
+          <li><AudioLines {...iconProps} size={15} /> Layered sound scenes</li>
         </ul>
 
         <div class="hero-cta">
@@ -280,7 +305,7 @@
           <div class="timer">48:12</div>
           <p class="card-subtitle">
             <CloudRain {...iconProps} size={16} class="inline-icon" />
-            Rain + cafe mix · Pomodoro off
+            Rain + cafe mix · Pomodoro or deep work
           </p>
           <div class="chips">
             <span><Timer {...iconProps} size={14} /> Focus timer</span>
@@ -293,7 +318,7 @@
           <p class="side-stat">12 <span>sessions</span></p>
           <p class="side-hint">
             <Repeat2 {...iconProps} size={14} class="inline-icon" />
-            Steady rhythm beats streaks.
+            Small sessions add up - focus becomes familiar.
           </p>
         </div>
       </div>
@@ -312,14 +337,178 @@
       {/each}
     </section>
 
+    <section id="preview" class="preview">
+      <div class="section-head section-head--split section-head--preview">
+        <div>
+          <p class="eyebrow">
+            <Sparkles {...iconProps} size={14} class="eyebrow-icon" />
+            See the app
+          </p>
+          <h2>Get a feel for the room before you download.</h2>
+          <p class="section-lead section-lead--right section-lead--preview">
+            A quick, distraction-free preview of the main surfaces: ambient, focus, boards, and micro-todos.
+          </p>
+        </div>
+        <div class="preview-badge">
+          <div class="preview-badge-icon">
+            <Timer {...iconProps} size={20} />
+          </div>
+          <div>
+            <strong class="preview-badge-title">Built for calm</strong>
+            <p class="preview-badge-body">Modern glass-like UI and Gruvbox-inspired colors.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <div class="preview-tabs" role="tablist" aria-label="App preview tabs">
+          {#each previewTabs as t, idx}
+            <button
+              type="button"
+              class="preview-tab"
+              class:preview-tab--active={idx === activePreview}
+              on:click={() => (activePreview = idx)}
+              role="tab"
+              aria-selected={idx === activePreview}
+            >
+              <t.Icon {...iconProps} size={18} />
+              {t.label}
+            </button>
+          {/each}
+        </div>
+
+          <div class="mock-app-media" aria-label="Mock app UI preview">
+            <div class="mock-app">
+              <div class="mock-app-body">
+                {#if activePreview === 0}
+                  <div class="mock-ambient">
+                    <div class="mock-ambient-left">
+                      <div class="mock-section-title">
+                        Ambient mixer <span class="mock-live-dot" aria-hidden="true"></span>
+                      </div>
+                      <div class="mock-section-subtitle">1 layer playing</div>
+
+                      <div class="mock-sound-list" role="list" aria-label="Sound layers">
+                        <div class="mock-sound-row" role="listitem">
+                          <span class="mock-radio" aria-hidden="true"></span>
+                          <div>
+                            <div class="mock-sound-name">Rain</div>
+                            <div class="mock-sound-sub">Steady rainfall</div>
+                          </div>
+                        </div>
+                        <div class="mock-sound-row" role="listitem">
+                          <span class="mock-radio mock-radio--muted" aria-hidden="true"></span>
+                          <div>
+                            <div class="mock-sound-name">Calm rain</div>
+                            <div class="mock-sound-sub">Gentle drizzle</div>
+                          </div>
+                        </div>
+                        <div class="mock-sound-row" role="listitem">
+                          <span class="mock-radio mock-radio--muted" aria-hidden="true"></span>
+                          <div>
+                            <div class="mock-sound-name">Rain + birds</div>
+                            <div class="mock-sound-sub">Tropical shower</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mock-slider-card">
+                        <div class="mock-slider-title">
+                          Café <span class="mock-mini-dot" aria-hidden="true"></span>
+                        </div>
+                        <div class="mock-slider-bar" aria-hidden="true">
+                          <div class="mock-slider-track"></div>
+                          <div class="mock-slider-thumb"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mock-ambient-right" aria-hidden="true">
+                      <div class="mock-mic-circle">
+                        <div class="mock-mic-shape"></div>
+                      </div>
+                      <div class="mock-wave-bars">
+                        <span></span><span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span><span></span>
+                      </div>
+                    </div>
+                  </div>
+                {:else if activePreview === 1}
+                  <div class="mock-focus">
+                    <div class="mock-focus-mode-pill">
+                      <span class="mock-focus-mode-pill__label">Focus timer</span>
+                      <span class="mock-focus-mode-pill__badge">IDLE</span>
+                    </div>
+                    <div class="mock-focus-timer">25:00</div>
+                    <div class="mock-focus-sub">25 minute focus, 5 minute break.</div>
+                    <div class="mock-focus-buttons">
+                      <button type="button" class="mock-pill-btn mock-pill-btn--active">Pomodoro</button>
+                      <button type="button" class="mock-pill-btn">Deep work</button>
+                    </div>
+                    <div class="mock-focus-actions">
+                      <button type="button" class="mock-action-btn mock-action-btn--primary">Start</button>
+                      <button type="button" class="mock-action-btn">Reset</button>
+                    </div>
+                    <div class="mock-focus-hint">Space to start / pause, R to reset.</div>
+                  </div>
+                {:else if activePreview === 2}
+                  <div class="mock-boards">
+                    <div class="mock-board-desc">
+                      Workspace board <span class="mock-board-desc-icon" aria-hidden="true"></span>
+                      <div class="mock-board-sub">Drag-free kanban. Move cards with arrows.</div>
+                    </div>
+                    <div class="mock-board-columns" aria-hidden="true">
+                      <div class="mock-board-col">
+                        <div class="mock-board-col-title">TODAY</div>
+                        <div class="mock-board-add">Add card...</div>
+                      </div>
+                      <div class="mock-board-col">
+                        <div class="mock-board-col-title">THIS WEEK</div>
+                        <div class="mock-board-add">Add card...</div>
+                      </div>
+                      <div class="mock-board-col">
+                        <div class="mock-board-col-title">LATER</div>
+                        <div class="mock-board-add">Add card...</div>
+                      </div>
+                    </div>
+                  </div>
+                {:else}
+                  <div class="mock-todos">
+                    <div class="mock-todos-tag">Micro-todos</div>
+                    <div class="mock-todos-sub">Daily tasks. Resets each morning.</div>
+                    <div class="mock-todos-input-row">
+                      <div class="mock-todos-input" aria-hidden="true">Add a task...</div>
+                      <button type="button" class="mock-todos-add-btn">Add</button>
+                    </div>
+                    <div class="mock-todos-empty">No tasks yet. Add one above.</div>
+                    <div class="mock-todos-bottom">0 open</div>
+                  </div>
+                {/if}
+              </div>
+            </div>
+          </div>
+
+        <div class="preview-caption">
+          <div class="preview-caption-left">
+            <span class="preview-caption-dot" aria-hidden="true"></span>
+            <strong>{previewTabs[activePreview].label}</strong>
+          </div>
+          <span class="preview-caption-text">{previewTabs[activePreview].caption}</span>
+            <span class="preview-caption-hint">Interactive mock</span>
+        </div>
+      </div>
+    </section>
+
     <section id="features" class="features">
       <div class="section-head">
         <p class="eyebrow">
           <LayoutGrid {...iconProps} size={14} class="eyebrow-icon" />
           What you get
         </p>
-        <h2>Everything your focus ritual needs.</h2>
-        <p class="section-lead">Sound, timing, and light structure—without turning your desk into a dashboard.</p>
+        <h2>Sound, focus, and lightweight planning - kept intentionally minimal.</h2>
+        <p class="section-lead">
+          Ambient soundscapes, a focused timer, and calm organization - without turning your desk into a dashboard.
+        </p>
       </div>
 
       <div class="feature-grid">
@@ -350,7 +539,7 @@
             <ListOrdered {...iconProps} size={14} class="eyebrow-icon" />
             How it works
           </p>
-          <h2>Open app. Start scene. Enter flow.</h2>
+          <h2>Sit down. Start a scene. Begin your focus session.</h2>
         </div>
         <p class="section-lead section-lead--right">
           Three calm steps you repeat until focus feels automatic.
@@ -386,11 +575,11 @@
           </p>
           <h2>Download for your operating system.</h2>
           <p class="lead">
-            Pick your platform—installers and release notes will land here as builds ship.
+            Choose your platform and download the app. It runs locally and stays ready for focus offline.
           </p>
           <ul class="download-trust">
-            <li><HardDrive {...iconProps} size={16} /> Local-first app</li>
-            <li><ShieldCheck {...iconProps} size={16} /> No account required</li>
+            <li><HardDrive {...iconProps} size={16} /> Local-first, offline-ready</li>
+            <li><ShieldCheck {...iconProps} size={16} /> No login required</li>
           </ul>
         </div>
         <div class="download-grid">
@@ -419,7 +608,7 @@
       </span>
       <div>
         <strong>lofikofi</strong>
-        <p>A calmer desktop workspace—not another task manager.</p>
+        <p>A calmer desktop workspace - not another task manager.</p>
       </div>
     </div>
     <nav class="footer-nav" aria-label="Footer">
