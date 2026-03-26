@@ -206,7 +206,8 @@
   <header class="site-header">
     <a class="brand" href="#top">
       <span class="brand-mark">
-        <Sparkles {...iconProps} size={22} />
+        <img class="brand-logo brand-logo--default" src="/logo.png" alt="lofikofi logo" width="28" height="28" />
+        <img class="brand-logo brand-logo--hover" src="/logo-hover.png" alt="" aria-hidden="true" width="28" height="28" />
       </span>
       <span class="brand-text">lofikofi</span>
     </a>
@@ -543,7 +544,8 @@
   <footer class="site-footer">
     <div class="footer-brand">
       <span class="brand-mark footer-brand-mark">
-        <Sparkles {...iconProps} size={20} />
+        <img class="brand-logo brand-logo--default" src="/logo.png" alt="lofikofi logo" width="24" height="24" />
+        <img class="brand-logo brand-logo--hover" src="/logo-hover.png" alt="" aria-hidden="true" width="24" height="24" />
       </span>
       <div>
         <strong>lofikofi</strong>

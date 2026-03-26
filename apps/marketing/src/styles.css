@@ -163,11 +163,73 @@ a {
   align-items: center;
   justify-content: center;
   width: 2.35rem;
-  height: 2.35rem;
+  height: 2.85rem;
   border-radius: 12px;
-  background: var(--accent-wash);
-  color: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  position: relative;
+}
+
+.brand-logo {
+  display: block;
+  object-fit: contain;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  bottom: 15%;
+  transition: opacity 0.2s ease;
+}
+
+.brand-logo--hover {
+  opacity: 0;
+}
+
+.brand:hover .brand-logo--default,
+.footer-brand:hover .brand-logo--default {
+  opacity: 0;
+}
+
+.brand:hover .brand-logo--hover,
+.footer-brand:hover .brand-logo--hover {
+  opacity: 1;
+}
+
+/* Dark theme: swap default and hover icons */
+[data-theme="dark"] .brand-logo--default {
+  opacity: 0;
+}
+
+[data-theme="dark"] .brand-logo--hover {
+  opacity: 1;
+}
+
+[data-theme="dark"] .brand:hover .brand-logo--default,
+[data-theme="dark"] .footer-brand:hover .brand-logo--default {
+  opacity: 1;
+}
+
+[data-theme="dark"] .brand:hover .brand-logo--hover,
+[data-theme="dark"] .footer-brand:hover .brand-logo--hover {
+  opacity: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand-logo--default {
+    opacity: 0;
+  }
+
+  :root:not([data-theme="light"]) .brand-logo--hover {
+    opacity: 1;
+  }
+
+  :root:not([data-theme="light"]) .brand:hover .brand-logo--default,
+  :root:not([data-theme="light"]) .footer-brand:hover .brand-logo--default {
+    opacity: 1;
+  }
+
+  :root:not([data-theme="light"]) .brand:hover .brand-logo--hover,
+  :root:not([data-theme="light"]) .footer-brand:hover .brand-logo--hover {
+    opacity: 0;
+  }
 }
 
 .brand-text {
