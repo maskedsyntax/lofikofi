@@ -1,0 +1,258 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: '3.41.4'
+  APP_NAME: lofikofi
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Enable macOS desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Get dependencies
+        working-directory: apps/desktop
+        run: flutter pub get
+
+      - name: Build macOS (universal)
+        working-directory: apps/desktop
+        run: flutter build macos --release
+
+      - name: Create DMG
+        working-directory: apps/desktop
+        run: |
+          APP_PATH="build/macos/Build/Products/Release/lofikofi.app"
+          DMG_NAME="${{ env.APP_NAME }}-${{ github.ref_name }}-macos-universal.dmg"
+
+          # Create a temporary directory for DMG contents
+          mkdir -p dmg_contents
+          cp -R "$APP_PATH" dmg_contents/
+
+          # Create a symlink to Applications
+          ln -s /Applications dmg_contents/Applications
+
+          # Create DMG
+          hdiutil create -volname "${{ env.APP_NAME }}" \
+            -srcfolder dmg_contents \
+            -ov -format UDZO \
+            "$DMG_NAME"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: apps/desktop/${{ env.APP_NAME }}-${{ github.ref_name }}-macos-universal.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Get dependencies
+        working-directory: apps/desktop
+        run: flutter pub get
+
+      - name: Build Windows
+        working-directory: apps/desktop
+        run: flutter build windows --release
+
+      - name: Create zip
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $buildDir = "build\windows\x64\runner\Release"
+          Compress-Archive -Path "$buildDir\*" -DestinationPath "${{ env.APP_NAME }}-${{ github.ref_name }}-windows-x64.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: apps/desktop/${{ env.APP_NAME }}-${{ github.ref_name }}-windows-x64.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libfuse2 desktop-file-utils
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Get dependencies
+        working-directory: apps/desktop
+        run: flutter pub get
+
+      - name: Build Linux
+        working-directory: apps/desktop
+        run: flutter build linux --release
+
+      - name: Create Debian package
+        working-directory: apps/desktop
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          PKG_DIR="${{ env.APP_NAME }}_${VERSION}_amd64"
+
+          mkdir -p "${PKG_DIR}/DEBIAN"
+          mkdir -p "${PKG_DIR}/usr/bin"
+          mkdir -p "${PKG_DIR}/usr/lib/${{ env.APP_NAME }}"
+          mkdir -p "${PKG_DIR}/usr/share/applications"
+          mkdir -p "${PKG_DIR}/usr/share/icons/hicolor/256x256/apps"
+
+          # Copy bundle contents
+          cp -R build/linux/x64/release/bundle/* "${PKG_DIR}/usr/lib/${{ env.APP_NAME }}/"
+
+          # Create launcher script
+          cat > "${PKG_DIR}/usr/bin/${{ env.APP_NAME }}" << 'LAUNCHER'
+          #!/bin/bash
+          exec /usr/lib/lofikofi/lofikofi "$@"
+          LAUNCHER
+          chmod +x "${PKG_DIR}/usr/bin/${{ env.APP_NAME }}"
+
+          # Create desktop entry
+          cat > "${PKG_DIR}/usr/share/applications/${{ env.APP_NAME }}.desktop" << 'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=Lofikofi
+          Comment=Ambient coworking environment
+          Exec=lofikofi
+          Icon=lofikofi
+          Categories=Utility;Audio;
+          Terminal=false
+          DESKTOP
+
+          # Copy icon if available
+          if [ -f "../../assets/logo.png" ]; then
+            cp "../../assets/logo.png" "${PKG_DIR}/usr/share/icons/hicolor/256x256/apps/${{ env.APP_NAME }}.png"
+          fi
+
+          # Create control file
+          cat > "${PKG_DIR}/DEBIAN/control" << CONTROL
+          Package: ${{ env.APP_NAME }}
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Depends: libgtk-3-0
+          Maintainer: maskedsyntax
+          Description: Lofikofi - Ambient coworking environment
+           A desktop-first, ambient coworking environment.
+          CONTROL
+
+          dpkg-deb --build "${PKG_DIR}"
+          mv "${PKG_DIR}.deb" "${{ env.APP_NAME }}-${{ github.ref_name }}-linux-amd64.deb"
+
+      - name: Create AppImage
+        working-directory: apps/desktop
+        run: |
+          # Download appimagetool
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+
+          # Create AppDir structure
+          APPDIR="${{ env.APP_NAME }}.AppDir"
+          mkdir -p "${APPDIR}/usr/bin"
+          mkdir -p "${APPDIR}/usr/lib"
+          mkdir -p "${APPDIR}/usr/share/icons/hicolor/256x256/apps"
+
+          # Copy bundle
+          cp -R build/linux/x64/release/bundle/* "${APPDIR}/usr/bin/"
+
+          # Create AppRun
+          cat > "${APPDIR}/AppRun" << 'APPRUN'
+          #!/bin/bash
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          exec "${HERE}/usr/bin/lofikofi" "$@"
+          APPRUN
+          chmod +x "${APPDIR}/AppRun"
+
+          # Create desktop file
+          cat > "${APPDIR}/${{ env.APP_NAME }}.desktop" << 'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=Lofikofi
+          Comment=Ambient coworking environment
+          Exec=lofikofi
+          Icon=lofikofi
+          Categories=Utility;Audio;
+          Terminal=false
+          DESKTOP
+
+          # Copy icon
+          if [ -f "../../assets/logo.png" ]; then
+            cp "../../assets/logo.png" "${APPDIR}/${{ env.APP_NAME }}.png"
+            cp "../../assets/logo.png" "${APPDIR}/usr/share/icons/hicolor/256x256/apps/${{ env.APP_NAME }}.png"
+          else
+            # Create a placeholder icon if none exists
+            touch "${APPDIR}/${{ env.APP_NAME }}.png"
+          fi
+
+          # Build AppImage
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage --no-appstream "${APPDIR}" \
+            "${{ env.APP_NAME }}-${{ github.ref_name }}-linux-x86_64.AppImage"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            apps/desktop/${{ env.APP_NAME }}-${{ github.ref_name }}-linux-amd64.deb
+            apps/desktop/${{ env.APP_NAME }}-${{ github.ref_name }}-linux-x86_64.AppImage
+
+  release:
+    needs: [build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/${{ env.APP_NAME }}-${{ github.ref_name }}-macos-universal.dmg
+            artifacts/${{ env.APP_NAME }}-${{ github.ref_name }}-windows-x64.zip
+            artifacts/${{ env.APP_NAME }}-${{ github.ref_name }}-linux-amd64.deb
+            artifacts/${{ env.APP_NAME }}-${{ github.ref_name }}-linux-x86_64.AppImage
