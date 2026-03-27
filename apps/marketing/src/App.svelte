@@ -28,6 +28,8 @@
 
   type Theme = "light" | "dark";
   const STORAGE_KEY = "lofikofi:marketing-theme";
+  const APP_VERSION = "v1.0.0";
+  const RELEASE_BASE = `https://github.com/maskedsyntax/lofikofi/releases/download/${APP_VERSION}`;
 
   const iconProps = { size: 20, strokeWidth: 1.65, "aria-hidden": true as const };
 
@@ -149,19 +151,19 @@
     {
       title: "macOS",
       subtitle: "Universal (Apple Silicon + Intel)",
-      href: "/downloads/lofikofi-macos",
+      href: `${RELEASE_BASE}/lofikofi-${APP_VERSION}-macos-universal.dmg`,
       Icon: Apple
     },
     {
       title: "Windows",
-      subtitle: "Installer (.exe)",
-      href: "/downloads/lofikofi-windows",
+      subtitle: "Portable (.zip)",
+      href: `${RELEASE_BASE}/lofikofi-${APP_VERSION}-windows-x64.zip`,
       Icon: Monitor
     },
     {
       title: "Linux",
-      subtitle: "AppImage / Debian package",
-      href: "/downloads/lofikofi-linux",
+      subtitle: "AppImage",
+      href: `${RELEASE_BASE}/lofikofi-${APP_VERSION}-linux-x86_64.AppImage`,
       Icon: Terminal
     }
   ] as const;
